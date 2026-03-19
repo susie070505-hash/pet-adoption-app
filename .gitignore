@@ -1,0 +1,19 @@
+# Expo/React Native standard gitignore
+node_modules/
+.expo/
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+# Local netlify build settings
+.netlify/
+# Mac OS files
+.DS_Store
+# Environment variables
+.env
+.env.local
+# Build artifacts
+dist/
+web-build/
+# Android/iOS specific
+android/
+ios/

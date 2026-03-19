@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "name": "宠遇",
+    "slug": "pet-adoption-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "softwareKeyboardLayoutMode": "pan"
+    },
+    "web": {}
+  }
+}
+

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Switch, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Switch, Alert, ActivityIndicator, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../supabase';
 
@@ -18,11 +18,24 @@ export default function RegisterScreen({ navigation }) {
       Alert.alert('密码太短', '密码至少需要 6 位。');
       return;
     }
-    const formattedPhone = phone.trim().startsWith('+') ? phone.trim() : `+86${phone.trim()}`;
+    const cleanPhone = phone.trim().replace(/\s/g, '');
+    // Use phone as email to avoid needing Phone Auth provider
+    const fakeEmail = `${cleanPhone}@petapp.local`;
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({ phone: formattedPhone, password: password.trim() });
+      const { data, error } = await supabase.auth.signUp({
+        email: fakeEmail,
+        password: password.trim(),
+      });
       if (error) throw error;
+      // Create initial profile row
+      if (data?.user) {
+        await supabase.from('profiles').upsert({
+          id: data.user.id,
+          nickname: `用户${cleanPhone.slice(-4)}`,
+          city: '上海',
+        });
+      }
       navigation.replace('MainTabs');
     } catch (err) {
       Alert.alert('注册失败', err.message || '请稍后重试');
@@ -32,7 +45,7 @@ export default function RegisterScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       <View style={styles.headerRow}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={22} color="#3C2A21" />
@@ -89,10 +102,7 @@ export default function RegisterScreen({ navigation }) {
           onPress={handleRegister}
           disabled={!agree || loading}
         >
-          {loading
-            ? <ActivityIndicator color="#FFFFFF" />
-            : <Text style={styles.registerText}>注册</Text>
-          }
+          {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.registerText}>注册</Text>}
         </TouchableOpacity>
 
         <View style={styles.loginRow}>
@@ -102,7 +112,7 @@ export default function RegisterScreen({ navigation }) {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 

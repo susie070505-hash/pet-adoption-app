@@ -1,11 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
-export default function SectionHeader({ title, actionLabel }) {
+export default function SectionHeader({ title, actionLabel, onAction }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
-      {actionLabel ? <Text style={styles.action}>{actionLabel}</Text> : null}
+      {actionLabel ? (
+        <TouchableOpacity onPress={onAction}>
+          <Text style={styles.action}>{actionLabel}</Text>
+        </TouchableOpacity>
+      ) : null}
     </View>
   );
 }

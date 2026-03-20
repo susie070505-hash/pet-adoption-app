@@ -1,22 +1,41 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 
 export default function AdoptionFormScreen({ route, navigation }) {
   const { petId } = route.params;
-  const { pets } = useApp();
+  const { pets, submitAdoption, user } = useApp();
   const pet = pets.find((p) => p.id === petId);
 
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
   const [experience, setExperience] = useState('');
   const [note, setNote] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
-    Alert.alert('申请已提交', '我们已收到您的领养申请，会尽快与您取得联系。', [
-      { text: '好的', onPress: () => navigation.goBack() }
-    ]);
+  const handleSubmit = async () => {
+    if (!name.trim() || !contact.trim()) {
+      Alert.alert('信息不完整', '请填写姓名和联系方式后再提交。');
+      return;
+    }
+    if (!user) {
+      Alert.alert('请先登录', '您需要登录后才能提交领养申请。');
+      return;
+    }
+    setLoading(true);
+    try {
+      await submitAdoption(petId, { name, contact, experience, note });
+      Alert.alert(
+        '申请已提交 🐾',
+        '感谢您的爱心！我们已收到您的领养申请，工作人员将在 1-3 个工作日内与您联系，请耐心等待审核结果。',
+        [{ text: '好的', onPress: () => navigation.goBack() }]
+      );
+    } catch (err) {
+      Alert.alert('提交失败', err.message || '请稍后重试');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -79,8 +98,11 @@ export default function AdoptionFormScreen({ route, navigation }) {
           />
         </View>
 
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitText}>提交申请表</Text>
+        <TouchableOpacity style={[styles.submitButton, loading && { opacity: 0.7 }]} onPress={handleSubmit} disabled={loading}>
+          {loading
+            ? <ActivityIndicator color="#FFFFFF" />
+            : <Text style={styles.submitText}>提交申请表</Text>
+          }
         </TouchableOpacity>
       </ScrollView>
     </View>

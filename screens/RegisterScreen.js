@@ -1,15 +1,68 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Switch } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Switch, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { supabase } from '../supabase';
 
 export default function RegisterScreen({ navigation }) {
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [agree, setAgree] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [registering, setRegistering] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const timerRef = useRef(null);
 
-  const handleRegister = () => {
-    navigation.replace('MainTabs');
+  useEffect(() => {
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, []);
+
+  const startCountdown = () => {
+    setCountdown(60);
+    timerRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) { clearInterval(timerRef.current); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const handleSendCode = async () => {
+    const trimmed = phone.trim();
+    if (!trimmed) { Alert.alert('请输入手机号码'); return; }
+    // 中国大陆手机号需加国际区号 +86
+    const formattedPhone = trimmed.startsWith('+') ? trimmed : `+86${trimmed}`;
+    setSendingOtp(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({ phone: formattedPhone });
+      if (error) throw error;
+      Alert.alert('验证码已发送', '请查收短信验证码。');
+      startCountdown();
+    } catch (err) {
+      Alert.alert('发送失败', err.message || '请检查手机号是否正确后重试。');
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    if (!code.trim()) { Alert.alert('请输入验证码'); return; }
+    const trimmed = phone.trim();
+    const formattedPhone = trimmed.startsWith('+') ? trimmed : `+86${trimmed}`;
+    setRegistering(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        phone: formattedPhone,
+        token: code.trim(),
+        type: 'sms',
+      });
+      if (error) throw error;
+      navigation.replace('MainTabs');
+    } catch (err) {
+      Alert.alert('验证失败', err.message || '验证码错误或已过期，请重新获取。');
+    } finally {
+      setRegistering(false);
+    }
   };
 
   return (
@@ -57,8 +110,15 @@ export default function RegisterScreen({ navigation }) {
               onChangeText={setCode}
             />
           </View>
-          <TouchableOpacity style={styles.codeButton}>
-            <Text style={styles.codeText}>获取验证码</Text>
+          <TouchableOpacity
+            style={[styles.codeButton, (countdown > 0 || sendingOtp) && { opacity: 0.6 }]}
+            onPress={handleSendCode}
+            disabled={countdown > 0 || sendingOtp}
+          >
+            {sendingOtp
+              ? <ActivityIndicator color="#FFFFFF" size="small" />
+              : <Text style={styles.codeText}>{countdown > 0 ? `${countdown}s` : '获取验证码'}</Text>
+            }
           </TouchableOpacity>
         </View>
 
@@ -86,11 +146,14 @@ export default function RegisterScreen({ navigation }) {
         </View>
 
         <TouchableOpacity
-          style={[styles.registerButton, !agree && { opacity: 0.6 }]}
+          style={[styles.registerButton, (!agree || registering) && { opacity: 0.6 }]}
           onPress={handleRegister}
-          disabled={!agree}
+          disabled={!agree || registering}
         >
-          <Text style={styles.registerText}>注册</Text>
+          {registering
+            ? <ActivityIndicator color="#FFFFFF" />
+            : <Text style={styles.registerText}>注册</Text>
+          }
         </TouchableOpacity>
 
         <Text style={styles.otherLabel}>其他方式注册</Text>

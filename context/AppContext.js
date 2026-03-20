@@ -68,6 +68,21 @@ export function AppProvider({ children }) {
     }
   };
 
+  const submitAdoption = async (petId, { name, contact, experience, note }) => {
+    if (!user) throw new Error('NOT_LOGGED_IN');
+    const { data, error } = await supabase.from('adoption_applications').insert({
+      user_id: user.id,
+      pet_id: petId,
+      applicant_name: name,
+      contact,
+      experience,
+      note,
+      status: 'pending',
+    }).select().single();
+    if (error) throw error;
+    return data;
+  };
+
   const toggleFavorite = async (petId) => {
     if (!user) return;
     const isFav = favorites.includes(petId);
@@ -129,6 +144,7 @@ export function AppProvider({ children }) {
       toggleFavorite,
       chats,
       addMessageToChat,
+      submitAdoption,
       user
     }),
     [pets, favorites, chats, user]

@@ -23,12 +23,12 @@ export default function ChatListScreen({ navigation }) {
             onPress={() => navigation.navigate('ChatDetail', { chatId: item.id })}
           >
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{item.with.charAt(0)}</Text>
+              <Text style={styles.avatarText}>{(item.with_user_name || '🐾').charAt(0)}</Text>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.chatName}>{item.with}</Text>
+              <Text style={styles.chatName}>{item.with_user_name || '宠物主'}</Text>
               <Text style={styles.chatPreview} numberOfLines={1}>
-                {item.lastMessage}
+                {item.last_message || '点击开始对话'}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color="#CBBFB6" />

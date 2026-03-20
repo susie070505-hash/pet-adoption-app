@@ -6,7 +6,7 @@ import ChatBubble from '../components/ChatBubble';
 import ChatInput from '../components/ChatInput';
 
 export default function ChatDetailScreen({ route, navigation }) {
-  const { chatId } = route.params;
+  const { chatId, petName } = route.params;
   const { chats, addMessageToChat } = useApp();
   const chat = chats.find((c) => c.id === chatId);
 
@@ -21,7 +21,7 @@ export default function ChatDetailScreen({ route, navigation }) {
           <Ionicons name="chevron-back" size={22} color="#3C2A21" />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.title}>{chat?.with ?? '聊天'}</Text>
+          <Text style={styles.title}>{chat?.with_user_name || petName || '在线沟通'}</Text>
           <Text style={styles.subtitle}>通常几小时内回复</Text>
         </View>
         <Ionicons name="call-outline" size={20} color="#C55A2B" />
@@ -31,7 +31,7 @@ export default function ChatDetailScreen({ route, navigation }) {
         style={{ flex: 1 }}
         data={chat?.messages ?? []}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <ChatBubble text={item.text} fromMe={item.fromMe} />}
+        renderItem={({ item }) => <ChatBubble text={item.text} fromMe={item.is_from_user} />}
         contentContainerStyle={{ paddingVertical: 10 }}
         showsVerticalScrollIndicator={false}
       />

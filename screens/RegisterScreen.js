@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Switch, Alert, ActivityIndicator, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
 import { supabase } from '../supabase';
 
 export default function RegisterScreen({ navigation }) {
@@ -18,27 +19,64 @@ export default function RegisterScreen({ navigation }) {
       Alert.alert('密码太短', '密码至少需要 6 位。');
       return;
     }
-    const cleanPhone = phone.trim().replace(/\s/g, '');
-    // Use phone as email to avoid needing Phone Auth provider
-    const fakeEmail = `${cleanPhone}@petapp.local`;
+    if (!agree) {
+      Alert.alert('隐私协议', '请先阅读并同意用户协议和隐私政策。');
+      return;
+    }
+
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signUp({
+      // 1. Request Location Permission
+      let city = '上海'; // Default
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === 'granted') {
+          const loc = await Location.getCurrentPositionAsync({});
+          const reverse = await Location.reverseGeocodeAsync(loc.coords);
+          if (reverse[0]?.city || reverse[0]?.district) {
+            city = reverse[0].city || reverse[0].district;
+          }
+        }
+      } catch (locErr) {
+        console.log('Location error:', locErr);
+      }
+
+      // 2. Register with Supabase (Email workaround)
+      const cleanPhone = phone.trim().replace(/\s/g, '');
+      const fakeEmail = `${cleanPhone}@petapp.local`;
+      
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email: fakeEmail,
         password: password.trim(),
       });
-      if (error) throw error;
-      // Create initial profile row
-      if (data?.user) {
+
+      if (signUpError) {
+        // If user already exists, try to log in instead
+        if (signUpError.message.includes('already registered')) {
+          const { error: signInError } = await supabase.auth.signInWithPassword({
+            email: fakeEmail,
+            password: password.trim(),
+          });
+          if (signInError) throw signInError;
+        } else {
+          throw signUpError;
+        }
+      }
+
+      // 3. Create/Update Profile
+      if (data?.user || (await supabase.auth.getUser()).data.user) {
+        const userId = data?.user?.id || (await supabase.auth.getUser()).data.user.id;
         await supabase.from('profiles').upsert({
-          id: data.user.id,
+          id: userId,
           nickname: `用户${cleanPhone.slice(-4)}`,
-          city: '上海',
+          city: city,
         });
       }
+
       navigation.replace('MainTabs');
     } catch (err) {
-      Alert.alert('注册失败', err.message || '请稍后重试');
+      console.error('Registration error:', err);
+      Alert.alert('操作失败', err.message || '请检查网络或稍后重试');
     } finally {
       setLoading(false);
     }
@@ -52,13 +90,12 @@ export default function RegisterScreen({ navigation }) {
         </TouchableOpacity>
         <View style={styles.cityBadge}>
           <Ionicons name="location-outline" size={14} color="#C55A2B" />
-          <Text style={styles.cityText}>当前城市：上海</Text>
-          <Ionicons name="chevron-down" size={14} color="#C55A2B" />
+          <Text style={styles.cityText}>发现梦中情宠</Text>
         </View>
       </View>
 
       <Text style={styles.title}>加入宠遇</Text>
-      <Text style={styles.subtitle}>开启您的领养之旅，给流浪毛孩子一个温暖的港湾。</Text>
+      <Text style={styles.subtitle}>开启您的领养之旅，我们会根据您的位置推荐同城毛孩子。</Text>
 
       <View style={styles.form}>
         <Text style={styles.label}>手机号码</Text>
@@ -94,22 +131,19 @@ export default function RegisterScreen({ navigation }) {
             thumbColor="#FFFFFF"
             trackColor={{ false: '#E2D7CF', true: '#C55A2B' }}
           />
-          <Text style={styles.agreeText}>我已阅读并同意《用户协议》和《隐私政策》</Text>
+          <Text style={styles.agreeText}>我已阅读并知晓系统将申请定位权限，并同意《隐私政策》</Text>
         </View>
 
         <TouchableOpacity
           style={[styles.registerButton, (!agree || loading) && { opacity: 0.6 }]}
           onPress={handleRegister}
-          disabled={!agree || loading}
+          disabled={loading}
         >
-          {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.registerText}>注册</Text>}
+          {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.registerText}>开启领养之旅</Text>}
         </TouchableOpacity>
 
         <View style={styles.loginRow}>
-          <Text style={styles.loginText}>已有账号？</Text>
-          <TouchableOpacity onPress={() => navigation.replace('MainTabs')}>
-            <Text style={styles.loginLink}>立即登录</Text>
-          </TouchableOpacity>
+          <Text style={styles.loginText}>已有账号？直接输入即可登录</Text>
         </View>
       </View>
     </ScrollView>
@@ -141,6 +175,5 @@ const styles = StyleSheet.create({
   },
   registerText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
   loginRow: { marginTop: 18, flexDirection: 'row', justifyContent: 'center' },
-  loginText: { fontSize: 13, color: '#8A7C71' },
-  loginLink: { marginLeft: 4, fontSize: 13, color: '#C55A2B' }
+  loginText: { fontSize: 12, color: '#8A7C71', fontStyle: 'italic' },
 });

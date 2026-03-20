@@ -46,25 +46,33 @@ export function AppProvider({ children }) {
   };
 
   const fetchProfile = async () => {
-    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-    if (data) setProfile(data);
+    if (!user) return;
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+    if (!error && data) setProfile(data);
+    else if (error && error.code === 'PGRST116') {
+      // Profile doesn't exist yet, create it
+      const { data: newProfile } = await supabase.from('profiles').insert({ id: user.id, nickname: '新用户', city: '上海' }).select().single();
+      if (newProfile) setProfile(newProfile);
+    }
   };
 
   const fetchAdoptionApplications = async () => {
+    if (!user) return;
     const { data, error } = await supabase
       .from('adoption_applications')
-      .select('*, pets(zh_name, avatar)')
+      .select('*, pets(*)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
     if (!error && data) setAdoptionApplications(data);
   };
 
   const fetchChats = async () => {
+    if (!user) return;
     const { data, error } = await supabase
       .from('chats')
       .select(`*, messages (*)`)
       .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+      .order('updated_at', { ascending: false });
     if (!error && data) {
       setChats(data.map(chat => ({
         ...chat,
@@ -106,13 +114,27 @@ export function AppProvider({ children }) {
       created_at: new Date().toISOString(),
       is_from_user: true
     };
+    
+    // Optimistic update
     setChats(prev => prev.map(chat =>
       chat.id === chatId
-        ? { ...chat, last_message: messageText, messages: [...(chat.messages || []), newMessage] }
+        ? { ...chat, last_message: messageText, messages: [...(chat.messages || []), newMessage], updated_at: new Date().toISOString() }
         : chat
     ));
-    await supabase.from('messages').insert({ chat_id: chatId, sender_id: user.id, text: messageText, is_from_user: true });
-    await supabase.from('chats').update({ last_message: messageText }).eq('id', chatId);
+
+    const { error } = await supabase.from('messages').insert({ 
+      chat_id: chatId, 
+      sender_id: user.id, 
+      text: messageText, 
+      is_from_user: true 
+    });
+    
+    if (!error) {
+      await supabase.from('chats').update({ 
+        last_message: messageText, 
+        updated_at: new Date().toISOString() 
+      }).eq('id', chatId);
+    }
   };
 
   const submitAdoption = async (petId, formData) => {

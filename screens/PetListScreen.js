@@ -10,8 +10,8 @@ export default function PetListScreen({ route, navigation }) {
   const { pets } = useApp();
   const species = route?.params?.species ?? null;
 
-  const filteredPets = species ? pets.filter(p => p.species === species) : pets;
-  const title = species ? `${SPECIES_LABEL[species] ?? '全部'}待领养` : '全部待领养宠物';
+  const filteredPets = species ? pets.filter(p => (p.species === species || p.species === (species === 'dog' ? 'dog' : species))) : pets;
+  const title = species ? `${SPECIES_LABEL[species] ?? '全部'}待领养` : '所有等爱的毛孩子';
 
   return (
     <View style={styles.container}>

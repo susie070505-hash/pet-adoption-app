@@ -1,13 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useApp } from '../context/AppContext';
 
 const STATUS_COLOR = { pending: '#FFC107', approved: '#4CAF50', rejected: '#F44336' };
 const STATUS_LABEL = { pending: '审核中', approved: '已通过', rejected: '未通过' };
 
 export default function ProfileScreen({ navigation }) {
-  const { user, profile, signOut, adoptionApplications } = useApp();
+  const { user, profile, signOut, adoptionApplications, updateProfile } = useApp();
 
   const handleSignOut = () => {
     Alert.alert('退出登录', '确定要退出当前账号吗？', [
@@ -21,6 +22,29 @@ export default function ProfileScreen({ navigation }) {
     ]);
   };
 
+  const pickAvatar = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('需要权限', '请在设置中允许访问相册。');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+
+    if (!result.canceled && result.assets?.[0]?.uri) {
+      try {
+        await updateProfile({ avatar_url: result.assets[0].uri });
+        Alert.alert('成功', '头像已更新');
+      } catch (err) {
+        Alert.alert('更新失败', err.message);
+      }
+    }
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       <View style={styles.headerRow}>
@@ -29,9 +53,16 @@ export default function ProfileScreen({ navigation }) {
 
       {/* Profile card */}
       <View style={styles.profileCard}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{(profile?.nickname ?? user?.email ?? 'U')[0].toUpperCase()}</Text>
-        </View>
+        <TouchableOpacity style={styles.avatar} onPress={pickAvatar}>
+          {profile?.avatar_url ? (
+            <Image source={{ uri: profile.avatar_url }} style={styles.avatarImg} />
+          ) : (
+            <Text style={styles.avatarText}>{(profile?.nickname || user?.email || 'U')[0].toUpperCase()}</Text>
+          )}
+          <View style={styles.cameraBadge}>
+            <Ionicons name="camera" size={12} color="#FFFFFF" />
+          </View>
+        </TouchableOpacity>
         <View style={{ flex: 1 }}>
           <Text style={styles.name}>{profile?.nickname ?? '用户'}</Text>
           <Text style={styles.subtitle}>{profile?.city ?? '未设置所在地'}</Text>
@@ -104,7 +135,13 @@ const styles = StyleSheet.create({
   },
   avatar: {
     width: 64, height: 64, borderRadius: 32, backgroundColor: '#F0D3BF',
-    justifyContent: 'center', alignItems: 'center', marginRight: 12
+    justifyContent: 'center', alignItems: 'center', marginRight: 12, position: 'relative'
+  },
+  avatarImg: { width: 64, height: 64, borderRadius: 32 },
+  cameraBadge: {
+    position: 'absolute', right: -2, bottom: -2, width: 22, height: 22,
+    borderRadius: 11, backgroundColor: '#C55A2B', justifyContent: 'center', alignItems: 'center',
+    borderWidth: 2, borderColor: '#FFFFFF'
   },
   avatarText: { fontSize: 24, fontWeight: '700', color: '#C55A2B' },
   name: { fontSize: 16, fontWeight: '700', color: '#3C2A21' },

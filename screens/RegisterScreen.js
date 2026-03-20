@@ -42,8 +42,8 @@ export default function RegisterScreen({ navigation }) {
       }
 
       // 2. Register with Supabase (Email workaround)
-      const cleanPhone = phone.trim().replace(/\s/g, '');
-      const fakeEmail = `${cleanPhone}@petapp.local`;
+      const cleanPhone = phone.trim().replace(/\s/g, '').replace(/[^0-9]/g, '');
+      const fakeEmail = `${cleanPhone}@m.petapp.com`;
       
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: fakeEmail,
@@ -52,12 +52,16 @@ export default function RegisterScreen({ navigation }) {
 
       if (signUpError) {
         // If user already exists, try to log in instead
-        if (signUpError.message.includes('already registered')) {
+        if (signUpError.message.includes('already registered') || signUpError.status === 400 && signUpError.message.includes('User already registered')) {
           const { error: signInError } = await supabase.auth.signInWithPassword({
             email: fakeEmail,
             password: password.trim(),
           });
           if (signInError) throw signInError;
+        } else if (signUpError.message.includes('rate limit')) {
+          Alert.alert('操作太快', '系统检测到过于频繁的操作，请 60 秒后重试。');
+          setLoading(false);
+          return;
         } else {
           throw signUpError;
         }

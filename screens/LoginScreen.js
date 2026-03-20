@@ -16,8 +16,8 @@ export default function LoginScreen({ navigation }) {
 
     setLoading(true);
     try {
-      const cleanPhone = phone.trim().replace(/\s/g, '');
-      const fakeEmail = `${cleanPhone}@petapp.local`;
+      const cleanPhone = phone.trim().replace(/\s/g, '').replace(/[^0-9]/g, '');
+      const fakeEmail = `${cleanPhone}@m.petapp.com`;
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email: fakeEmail,

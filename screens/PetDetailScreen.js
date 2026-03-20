@@ -33,12 +33,9 @@ export default function PetDetailScreen({ route, navigation }) {
   if (!pet) return null;
 
   const handleFavorite = () => {
-    if (!user) {
-      Alert.alert('请先登录', '登录后才能收藏宠物哦～');
-      return;
-    }
+    const isNowFav = !favorite;
     toggleFavorite(pet.id);
-    if (!favorite) {
+    if (isNowFav) {
       setToastVisible(true);
       setTimeout(() => setToastVisible(false), 2500);
     }

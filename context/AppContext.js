@@ -28,12 +28,20 @@ export function AppProvider({ children }) {
       fetchProfile();
       fetchAdoptionApplications();
     } else {
-      setFavorites([]);
+      // Guest mode: load local favorites
+      AsyncStorage.getItem('guest_favorites').then(data => {
+        if (data) setFavorites(JSON.parse(data));
+      });
       setChats([]);
       setProfile(null);
       setAdoptionApplications([]);
     }
   }, [user]);
+
+  const toggleFavorite = async (petId) => {
+    const isFav = favorites.includes(petId);
+    const newFavs = isFav ? favorites.filter(id => id !== petId) : [...prev, petId]; // logic fix below
+  };
 
   const fetchPets = async () => {
     const { data, error } = await supabase.from('pets').select('*').order('created_at', { ascending: false });
@@ -125,13 +133,19 @@ export function AppProvider({ children }) {
   };
 
   const toggleFavorite = async (petId) => {
-    if (!user) return;
     const isFav = favorites.includes(petId);
-    setFavorites(prev => isFav ? prev.filter(id => id !== petId) : [...prev, petId]);
-    if (isFav) {
-      await supabase.from('favorites').delete().match({ user_id: user.id, pet_id: petId });
+    const nextFavs = isFav ? favorites.filter(id => id !== petId) : [...favorites, petId];
+    setFavorites(nextFavs);
+
+    if (user) {
+      if (isFav) {
+        await supabase.from('favorites').delete().match({ user_id: user.id, pet_id: petId });
+      } else {
+        await supabase.from('favorites').insert({ user_id: user.id, pet_id: petId });
+      }
     } else {
-      await supabase.from('favorites').insert({ user_id: user.id, pet_id: petId });
+      // Save locally for guests
+      await AsyncStorage.setItem('guest_favorites', JSON.stringify(nextFavs));
     }
   };
 

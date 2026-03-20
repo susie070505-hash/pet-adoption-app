@@ -140,7 +140,11 @@ export default function HomeScreen({ navigation }) {
         <SectionHeader title="养宠新知" actionLabel="更多" onAction={() => {}} />
         <View style={styles.knowledgeList}>
           {KNOWLEDGE_ARTICLES.map(article => (
-            <TouchableOpacity key={article.id} style={styles.knowledgeCard}>
+            <TouchableOpacity 
+              key={article.id} 
+              style={styles.knowledgeCard}
+              onPress={() => navigation.navigate('KnowledgeDetail', { articleId: article.id })}
+            >
               <Image source={{ uri: article.image }} style={styles.knowledgeImg} />
               <View style={styles.knowledgeInfo}>
                 <Text style={styles.knowledgeTag}>{article.tag}</Text>

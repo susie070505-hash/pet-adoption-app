@@ -11,6 +11,7 @@ import AddPetScreen from '../screens/AddPetScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import PrivacySettingsScreen from '../screens/PrivacySettingsScreen';
 import LoginScreen from '../screens/LoginScreen';
+import KnowledgeDetailScreen from '../screens/KnowledgeDetailScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -21,6 +22,7 @@ export default function RootNavigator() {
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="MainTabs" component={TabNavigator} />
+      <Stack.Screen name="KnowledgeDetail" component={KnowledgeDetailScreen} />
       <Stack.Screen name="PetList" component={PetListScreen} />
       <Stack.Screen name="PetDetail" component={PetDetailScreen} />
       <Stack.Screen name="AdoptionForm" component={AdoptionFormScreen} />

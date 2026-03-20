@@ -31,26 +31,28 @@ export default function WelcomeScreen({ navigation }) {
         </Text>
       </View>
 
-      <TouchableOpacity
-        style={styles.primaryButton}
-        onPress={() => navigation.navigate('Register')}
-      >
-        <Text style={styles.primaryText}>立即开始</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.loginButton}
-        onPress={() => navigation.navigate('Login')}
-      >
-        <Text style={styles.loginButtonText}>已有账号？立即登录</Text>
-      </TouchableOpacity>
+      <View style={{ marginTop: 40 }}>
+        <TouchableOpacity
+          style={styles.primaryButton}
+          onPress={() => navigation.navigate('Register')}
+        >
+          <Text style={styles.primaryText}>立即开始</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.loginLink} 
+          onPress={() => navigation.navigate('Login')}
+        >
+          <Text style={styles.loginLinkText}>已有账号？立即登录</Text>
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.footer}>
         <TouchableOpacity>
           <Text style={styles.footerLink}>了解更多</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.replace('MainTabs')}>
-          <Text style={styles.footerLink}>已有账号登录</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+          <Text style={styles.footerLink}>帮助与支持</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -130,7 +132,6 @@ const styles = StyleSheet.create({
     color: '#8A7C71'
   },
   primaryButton: {
-    marginTop: 40,
     backgroundColor: '#C55A2B',
     borderRadius: 999,
     paddingVertical: 14,
@@ -140,6 +141,16 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700'
+  },
+  loginLink: {
+    marginTop: 12,
+    alignSelf: 'center',
+    paddingVertical: 4
+  },
+  loginLinkText: {
+    fontSize: 13,
+    color: '#8A7C71',
+    fontWeight: '500'
   },
   footer: {
     marginTop: 20,

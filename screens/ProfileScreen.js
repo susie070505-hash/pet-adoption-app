@@ -8,7 +8,7 @@ const STATUS_COLOR = { pending: '#FFC107', approved: '#4CAF50', rejected: '#F443
 const STATUS_LABEL = { pending: '审核中', approved: '已通过', rejected: '未通过' };
 
 export default function ProfileScreen({ navigation }) {
-  const { user, profile, signOut, adoptionApplications, updateProfile } = useApp();
+  const { user, profile, signOut, adoptionApplications, updateProfile, favorites } = useApp();
 
   const handleSignOut = () => {
     Alert.alert('退出登录', '确定要退出当前账号吗？', [

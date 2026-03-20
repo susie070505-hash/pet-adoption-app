@@ -122,7 +122,27 @@ export default function HomeScreen({ navigation }) {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-        {/* Gallery / Shuffled list (now as a Section) */}
+        {/* Category Indexing */}
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false} 
+          contentContainerStyle={styles.categoryScroll}
+        >
+          {CATEGORIES.map(cat => (
+            <TouchableOpacity 
+              key={cat.id} 
+              style={styles.categoryItem}
+              onPress={() => navigation.navigate('PetList', { species: cat.id })}
+            >
+              <View style={[styles.categoryIcon, { backgroundColor: cat.color + '22' }]}>
+                <Ionicons name={cat.icon} size={24} color={cat.color} />
+              </View>
+              <Text style={styles.categoryLabel}>{cat.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* 精选画廊 (Gallery) */}
         <SectionHeader title="精选画廊" actionLabel="全部" onAction={() => navigation.navigate('PetList')} />
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20 }}>
           {displayedPets.slice(0, 6).map((p) => (
@@ -130,13 +150,13 @@ export default function HomeScreen({ navigation }) {
               <Image source={{ uri: p.avatar }} style={styles.featuredImage} />
               <View style={styles.featuredOverlay}>
                 <Text style={styles.featuredTitle}>{p.zh_name} · {p.breed}</Text>
-                <Text style={styles.featuredSub}>{p.city} · 正在等爱</Text>
+                <Text style={styles.featuredSub}>{p.city} · 准备回家</Text>
               </View>
             </TouchableOpacity>
           ))}
         </ScrollView>
 
-        {/* Pet Knowledge Section */}
+        {/* Pet Knowledge */}
         <SectionHeader title="养宠新知" actionLabel="更多" onAction={() => {}} />
         <View style={styles.knowledgeList}>
           {KNOWLEDGE_ARTICLES.map(article => (
@@ -155,13 +175,15 @@ export default function HomeScreen({ navigation }) {
           ))}
         </View>
 
-        {/* List of Pets */}
-        <SectionHeader title="发现新伙伴" actionLabel="按地理位置" onAction={() => setCityModalVisible(true)} />
-        <View style={styles.petGrid}>
+        {/* 发现新伙伴 (Horizontal) */}
+        <SectionHeader title="发现新伙伴" actionLabel="同城推荐" onAction={() => setCityModalVisible(true)} />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20 }}>
           {displayedPets.map((pet) => (
-            <PetCard key={pet.id} pet={pet} onPress={() => navigation.navigate('PetDetail', { petId: pet.id })} />
+            <View key={pet.id} style={{ marginRight: 12 }}>
+              <PetCard pet={pet} onPress={() => navigation.navigate('PetDetail', { petId: pet.id })} />
+            </View>
           ))}
-        </View>
+        </ScrollView>
       </ScrollView>
 
       {/* Filter Modal */}
@@ -246,9 +268,13 @@ const styles = StyleSheet.create({
   filterDot: { position: 'absolute', top: 10, right: 10, width: 6, height: 6, borderRadius: 3, backgroundColor: '#FF6B6B', borderWidth: 1, borderColor: '#C55A2B' },
   featuredCard: { width: 220, height: 140, borderRadius: 24, overflow: 'hidden', marginRight: 14, backgroundColor: '#EBD9CB' },
   featuredImage: { width: '100%', height: '100%' },
-  featuredOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 10, backgroundColor: 'rgba(0,0,0,0.3)' },
+  featuredOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 12, backgroundColor: 'rgba(60,42,33,0.5)' },
   featuredTitle: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
-  featuredSub: { color: '#FFD700', fontSize: 10, marginTop: 2 },
+  featuredSub: { color: '#FFD700', fontSize: 10, marginTop: 2, fontWeight: '600' },
+  categoryScroll: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 10 },
+  categoryItem: { alignItems: 'center', marginRight: 24 },
+  categoryIcon: { width: 56, height: 56, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginBottom: 6 },
+  categoryLabel: { fontSize: 13, fontWeight: '600', color: '#3C2A21' },
   knowledgeList: { paddingHorizontal: 20, marginTop: 8 },
   knowledgeCard: { flexDirection: 'row', backgroundColor: '#FFFFFF', borderRadius: 20, padding: 12, marginBottom: 12 },
   knowledgeImg: { width: 80, height: 80, borderRadius: 12 },

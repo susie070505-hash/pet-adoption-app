@@ -13,7 +13,7 @@ const { width } = Dimensions.get('window');
 const CATEGORIES = [
   { id: 'dog', label: '狗狗', icon: 'paw', color: '#FFB347' },
   { id: 'cat', label: '猫咪', icon: 'logo-github', color: '#77DD77' },
-  { id: 'bird', label: '小鸟', icon: 'airplane', color: '#89CFF0' },
+  { id: 'bird', label: '小鸟', icon: 'logo-twitter', color: '#89CFF0' },
   { id: 'other', label: '其他', icon: 'apps', color: '#B39EB5' },
 ];
 

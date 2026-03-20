@@ -85,7 +85,7 @@ export default function ProfileScreen({ navigation }) {
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={styles.statValue}>0</Text>
+          <Text style={styles.statValue}>{favorites.length}</Text>
           <Text style={styles.statLabel}>收藏宠物</Text>
         </View>
       </View>

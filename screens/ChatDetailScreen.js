@@ -34,9 +34,9 @@ export default function ChatDetailScreen({ route, navigation }) {
         data={chat?.messages ?? []}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={[styles.bubbleWrapper, item.is_from_user ? styles.myBubbleWrapper : styles.theirBubbleWrapper]}>
+          <View style={[styles.bubbleContainer, item.is_from_user ? styles.myContainer : styles.theirContainer]}>
             <View style={[styles.bubble, item.is_from_user ? styles.myBubble : styles.theirBubble]}>
-              <Text style={[styles.bubbleText, item.is_from_user ? styles.myBubbleText : styles.theirBubbleText]}>{item.text}</Text>
+              <Text style={[styles.bubbleText, item.is_from_user ? styles.myText : styles.theirText]}>{item.text}</Text>
             </View>
           </View>
         )}

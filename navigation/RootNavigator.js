@@ -7,6 +7,7 @@ import PetDetailScreen from '../screens/PetDetailScreen';
 import AdoptionFormScreen from '../screens/AdoptionFormScreen';
 import ChatDetailScreen from '../screens/ChatDetailScreen';
 import PetListScreen from '../screens/PetListScreen';
+import AddPetScreen from '../screens/AddPetScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,6 +21,7 @@ export default function RootNavigator() {
       <Stack.Screen name="PetDetail" component={PetDetailScreen} />
       <Stack.Screen name="AdoptionForm" component={AdoptionFormScreen} />
       <Stack.Screen name="ChatDetail" component={ChatDetailScreen} />
+      <Stack.Screen name="AddPet" component={AddPetScreen} />
     </Stack.Navigator>
   );
 }

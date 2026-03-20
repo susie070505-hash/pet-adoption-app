@@ -1,67 +1,33 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Switch, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../supabase';
 
 export default function RegisterScreen({ navigation }) {
   const [phone, setPhone] = useState('');
-  const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [agree, setAgree] = useState(false);
-  const [sendingOtp, setSendingOtp] = useState(false);
-  const [registering, setRegistering] = useState(false);
-  const [countdown, setCountdown] = useState(0);
-  const timerRef = useRef(null);
-
-  useEffect(() => {
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, []);
-
-  const startCountdown = () => {
-    setCountdown(60);
-    timerRef.current = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) { clearInterval(timerRef.current); return 0; }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  const handleSendCode = async () => {
-    const trimmed = phone.trim();
-    if (!trimmed) { Alert.alert('请输入手机号码'); return; }
-    // 中国大陆手机号需加国际区号 +86
-    const formattedPhone = trimmed.startsWith('+') ? trimmed : `+86${trimmed}`;
-    setSendingOtp(true);
-    try {
-      const { error } = await supabase.auth.signInWithOtp({ phone: formattedPhone });
-      if (error) throw error;
-      Alert.alert('验证码已发送', '请查收短信验证码。');
-      startCountdown();
-    } catch (err) {
-      Alert.alert('发送失败', err.message || '请检查手机号是否正确后重试。');
-    } finally {
-      setSendingOtp(false);
-    }
-  };
+  const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!code.trim()) { Alert.alert('请输入验证码'); return; }
-    const trimmed = phone.trim();
-    const formattedPhone = trimmed.startsWith('+') ? trimmed : `+86${trimmed}`;
-    setRegistering(true);
+    if (!phone.trim() || !password.trim()) {
+      Alert.alert('信息不完整', '请填写手机号码和密码。');
+      return;
+    }
+    if (password.length < 6) {
+      Alert.alert('密码太短', '密码至少需要 6 位。');
+      return;
+    }
+    const formattedPhone = phone.trim().startsWith('+') ? phone.trim() : `+86${phone.trim()}`;
+    setLoading(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({
-        phone: formattedPhone,
-        token: code.trim(),
-        type: 'sms',
-      });
+      const { error } = await supabase.auth.signUp({ phone: formattedPhone, password: password.trim() });
       if (error) throw error;
       navigation.replace('MainTabs');
     } catch (err) {
-      Alert.alert('验证失败', err.message || '验证码错误或已过期，请重新获取。');
+      Alert.alert('注册失败', err.message || '请稍后重试');
     } finally {
-      setRegistering(false);
+      setLoading(false);
     }
   };
 
@@ -79,9 +45,7 @@ export default function RegisterScreen({ navigation }) {
       </View>
 
       <Text style={styles.title}>加入宠遇</Text>
-      <Text style={styles.subtitle}>
-        开启您的领养之旅，给流浪毛孩子一个温暖的港湾。
-      </Text>
+      <Text style={styles.subtitle}>开启您的领养之旅，给流浪毛孩子一个温暖的港湾。</Text>
 
       <View style={styles.form}>
         <Text style={styles.label}>手机号码</Text>
@@ -95,31 +59,6 @@ export default function RegisterScreen({ navigation }) {
             value={phone}
             onChangeText={setPhone}
           />
-        </View>
-
-        <Text style={styles.label}>验证码</Text>
-        <View style={styles.row}>
-          <View style={[styles.inputWrapper, { flex: 1 }]}>
-            <Ionicons name="chatbox-ellipses-outline" size={18} color="#B9B3AA" />
-            <TextInput
-              style={styles.input}
-              placeholder="短信验证码"
-              placeholderTextColor="#B9B3AA"
-              keyboardType="number-pad"
-              value={code}
-              onChangeText={setCode}
-            />
-          </View>
-          <TouchableOpacity
-            style={[styles.codeButton, (countdown > 0 || sendingOtp) && { opacity: 0.6 }]}
-            onPress={handleSendCode}
-            disabled={countdown > 0 || sendingOtp}
-          >
-            {sendingOtp
-              ? <ActivityIndicator color="#FFFFFF" size="small" />
-              : <Text style={styles.codeText}>{countdown > 0 ? `${countdown}s` : '获取验证码'}</Text>
-            }
-          </TouchableOpacity>
         </View>
 
         <Text style={styles.label}>设置密码</Text>
@@ -146,25 +85,15 @@ export default function RegisterScreen({ navigation }) {
         </View>
 
         <TouchableOpacity
-          style={[styles.registerButton, (!agree || registering) && { opacity: 0.6 }]}
+          style={[styles.registerButton, (!agree || loading) && { opacity: 0.6 }]}
           onPress={handleRegister}
-          disabled={!agree || registering}
+          disabled={!agree || loading}
         >
-          {registering
+          {loading
             ? <ActivityIndicator color="#FFFFFF" />
             : <Text style={styles.registerText}>注册</Text>
           }
         </TouchableOpacity>
-
-        <Text style={styles.otherLabel}>其他方式注册</Text>
-        <View style={styles.otherRow}>
-          <View style={styles.otherIcon}>
-            <Ionicons name="chatbubble-ellipses-outline" size={20} color="#C55A2B" />
-          </View>
-          <View style={styles.otherIcon}>
-            <Ionicons name="at-outline" size={20} color="#C55A2B" />
-          </View>
-        </View>
 
         <View style={styles.loginRow}>
           <Text style={styles.loginText}>已有账号？</Text>
@@ -178,136 +107,30 @@ export default function RegisterScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFF7F1',
-    paddingTop: 52,
-    paddingHorizontal: 24
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center'
-  },
+  container: { flex: 1, backgroundColor: '#FFF7F1', paddingTop: 52, paddingHorizontal: 24 },
+  headerRow: { flexDirection: 'row', alignItems: 'center' },
   cityBadge: {
-    marginLeft: 'auto',
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F7E3D4',
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4
+    marginLeft: 'auto', flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#F7E3D4', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4
   },
-  cityText: {
-    fontSize: 12,
-    color: '#C55A2B',
-    marginHorizontal: 4
-  },
-  title: {
-    marginTop: 24,
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#3C2A21'
-  },
-  subtitle: {
-    marginTop: 8,
-    fontSize: 14,
-    color: '#8A7C71'
-  },
-  form: {
-    marginTop: 28
-  },
-  label: {
-    marginTop: 16,
-    fontSize: 13,
-    color: '#6B5B53',
-    marginBottom: 6
-  },
+  cityText: { fontSize: 12, color: '#C55A2B', marginHorizontal: 4 },
+  title: { marginTop: 24, fontSize: 24, fontWeight: '800', color: '#3C2A21' },
+  subtitle: { marginTop: 8, fontSize: 14, color: '#8A7C71' },
+  form: { marginTop: 28 },
+  label: { marginTop: 16, fontSize: 13, color: '#6B5B53', marginBottom: 6 },
   inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F4E8DE',
-    borderRadius: 18,
-    paddingHorizontal: 14,
-    paddingVertical: 10
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#F4E8DE', borderRadius: 18, paddingHorizontal: 14, paddingVertical: 10
   },
-  input: {
-    marginLeft: 8,
-    flex: 1,
-    fontSize: 14,
-    color: '#3C2A21'
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center'
-  },
-  codeButton: {
-    marginLeft: 10,
-    backgroundColor: '#C55A2B',
-    borderRadius: 18,
-    paddingHorizontal: 14,
-    paddingVertical: 10
-  },
-  codeText: {
-    color: '#FFFFFF',
-    fontSize: 13
-  },
-  agreeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 18
-  },
-  agreeText: {
-    marginLeft: 8,
-    fontSize: 12,
-    color: '#8A7C71',
-    flex: 1
-  },
+  input: { marginLeft: 8, flex: 1, fontSize: 14, color: '#3C2A21' },
+  agreeRow: { flexDirection: 'row', alignItems: 'center', marginTop: 18 },
+  agreeText: { marginLeft: 8, fontSize: 12, color: '#8A7C71', flex: 1 },
   registerButton: {
-    marginTop: 24,
-    backgroundColor: '#C55A2B',
-    borderRadius: 999,
-    paddingVertical: 14,
-    alignItems: 'center'
+    marginTop: 24, backgroundColor: '#C55A2B',
+    borderRadius: 999, paddingVertical: 14, alignItems: 'center'
   },
-  registerText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700'
-  },
-  otherLabel: {
-    marginTop: 20,
-    textAlign: 'center',
-    fontSize: 12,
-    color: '#B9B3AA'
-  },
-  otherRow: {
-    marginTop: 12,
-    flexDirection: 'row',
-    justifyContent: 'center'
-  },
-  otherIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: '#E2D7CF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginHorizontal: 12
-  },
-  loginRow: {
-    marginTop: 18,
-    flexDirection: 'row',
-    justifyContent: 'center'
-  },
-  loginText: {
-    fontSize: 13,
-    color: '#8A7C71'
-  },
-  loginLink: {
-    marginLeft: 4,
-    fontSize: 13,
-    color: '#C55A2B'
-  }
+  registerText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
+  loginRow: { marginTop: 18, flexDirection: 'row', justifyContent: 'center' },
+  loginText: { fontSize: 13, color: '#8A7C71' },
+  loginLink: { marginLeft: 4, fontSize: 13, color: '#C55A2B' }
 });
-

@@ -1,11 +1,19 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 
 export default function PetCard({ pet, onPress }) {
-  const { isFavorite, toggleFavorite } = useApp();
+  const { isFavorite, toggleFavorite, user } = useApp();
   const favorite = isFavorite(pet.id);
+
+  const handleFavorite = () => {
+    if (!user) {
+      Alert.alert('请先登录', '登录后才能收藏宠物哦～');
+      return;
+    }
+    toggleFavorite(pet.id);
+  };
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.9}>
@@ -13,7 +21,7 @@ export default function PetCard({ pet, onPress }) {
         <Image source={{ uri: pet.avatar }} style={styles.image} />
         <TouchableOpacity
           style={styles.heartButton}
-          onPress={() => toggleFavorite(pet.id)}
+          onPress={handleFavorite}
         >
           <Ionicons
             name={favorite ? 'heart' : 'heart-outline'}

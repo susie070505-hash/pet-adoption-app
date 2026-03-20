@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
@@ -44,6 +44,18 @@ export default function ProfileScreen() {
         <ProfileItem icon="shield-checkmark-outline" label="隐私与安全" />
         <ProfileItem icon="notifications-outline" label="通知设置" />
       </View>
+
+      <TouchableOpacity
+        style={styles.uploadCard}
+        onPress={() => navigation.navigate('AddPet')}
+      >
+        <Ionicons name="paw" size={22} color="#C55A2B" />
+        <View style={{ flex: 1, marginLeft: 12 }}>
+          <Text style={styles.uploadTitle}>上传宠物信息</Text>
+          <Text style={styles.uploadSub}>帮助流浪宠物找到温暖的家</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color="#CBBFB6" />
+      </TouchableOpacity>
 
       <TouchableOpacity style={styles.logoutBtn}>
         <Text style={styles.logoutText}>退出当前账号</Text>
@@ -167,6 +179,28 @@ const styles = StyleSheet.create({
   logoutText: {
     fontSize: 13,
     color: '#C55A2B'
+  },
+  uploadCard: {
+    marginTop: 18,
+    marginHorizontal: 20,
+    backgroundColor: '#FFF0E6',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#F0D3BF'
+  },
+  uploadTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#3C2A21'
+  },
+  uploadSub: {
+    marginTop: 2,
+    fontSize: 12,
+    color: '#8A7C71'
   }
 });
 

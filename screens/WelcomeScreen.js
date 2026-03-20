@@ -31,7 +31,7 @@ export default function WelcomeScreen({ navigation }) {
         </Text>
       </View>
 
-      <View style={{ marginTop: 40 }}>
+      <View style={{ marginTop: 60, width: '100%' }}>
         <TouchableOpacity
           style={styles.primaryButton}
           onPress={() => navigation.navigate('Register')}
@@ -48,11 +48,11 @@ export default function WelcomeScreen({ navigation }) {
       </View>
 
       <View style={styles.footer}>
+        <TouchableOpacity onPress={() => navigation.replace('MainTabs')}>
+           <Text style={styles.footerLink}>游客访问</Text>
+        </TouchableOpacity>
         <TouchableOpacity>
           <Text style={styles.footerLink}>了解更多</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.footerLink}>帮助与支持</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -60,106 +60,28 @@ export default function WelcomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFF7F1',
-    paddingHorizontal: 24,
-    paddingTop: 60
-  },
-  hero: {
-    height: 260,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
+  container: { flex: 1, backgroundColor: '#FFF7F1', paddingHorizontal: 24, paddingTop: 60 },
+  hero: { height: 260, justifyContent: 'center', alignItems: 'center' },
   cardLarge: {
-    width: 210,
-    height: 230,
-    borderRadius: 26,
-    overflow: 'hidden',
-    backgroundColor: '#EEE0D6',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 5
+    width: 210, height: 230, borderRadius: 26, overflow: 'hidden', backgroundColor: '#EEE0D6',
+    shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 5
   },
-  imgLarge: {
-    width: '100%',
-    height: '100%'
-  },
+  imgLarge: { width: '100%', height: '100%' },
   cardSmall: {
-    position: 'absolute',
-    bottom: -10,
-    right: 10,
-    width: 130,
-    height: 140,
-    borderRadius: 22,
-    overflow: 'hidden',
-    borderWidth: 4,
-    borderColor: '#FFF7F1',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 }
+    position: 'absolute', bottom: -10, right: 10, width: 130, height: 140, borderRadius: 22,
+    overflow: 'hidden', borderWidth: 4, borderColor: '#FFF7F1',
+    shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 14, shadowOffset: { width: 0, height: 6 }
   },
-  imgSmall: {
-    width: '100%',
-    height: '100%'
-  },
-  content: {
-    marginTop: 28
-  },
-  badge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#F7D8BF',
-    color: '#C55A2B',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-    fontSize: 12,
-    fontWeight: '600'
-  },
-  title: {
-    marginTop: 12,
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#3C2A21',
-    lineHeight: 32
-  },
-  subtitle: {
-    marginTop: 10,
-    fontSize: 14,
-    color: '#8A7C71'
-  },
-  primaryButton: {
-    backgroundColor: '#C55A2B',
-    borderRadius: 999,
-    paddingVertical: 14,
-    alignItems: 'center'
-  },
-  primaryText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700'
-  },
-  loginLink: {
-    marginTop: 12,
-    alignSelf: 'center',
-    paddingVertical: 4
-  },
-  loginLinkText: {
-    fontSize: 13,
-    color: '#8A7C71',
-    fontWeight: '500'
-  },
-  footer: {
-    marginTop: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between'
-  },
-  footerLink: {
-    fontSize: 13,
-    color: '#8A7C71'
-  }
+  imgSmall: { width: '100%', height: '100%' },
+  content: { marginTop: 28 },
+  badge: { alignSelf: 'flex-start', backgroundColor: '#F7D8BF', color: '#C55A2B', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, fontSize: 12, fontWeight: '600' },
+  title: { marginTop: 12, fontSize: 26, fontWeight: '800', color: '#3C2A21', lineHeight: 32 },
+  subtitle: { marginTop: 10, fontSize: 14, color: '#8A7C71' },
+  primaryButton: { backgroundColor: '#C55A2B', borderRadius: 999, paddingVertical: 14, alignItems: 'center' },
+  primaryText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
+  loginLink: { marginTop: 12, alignSelf: 'flex-end', marginRight: 10, paddingVertical: 4 },
+  loginLinkText: { fontSize: 13, color: '#C55A2B', fontWeight: '700', textDecorationLine: 'underline' },
+  footer: { marginTop: 'auto', marginBottom: 20, flexDirection: 'row', justifyContent: 'space-between' },
+  footerLink: { fontSize: 12, color: '#CBBFB6' }
 });
 

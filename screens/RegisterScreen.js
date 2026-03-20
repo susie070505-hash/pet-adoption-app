@@ -142,9 +142,9 @@ export default function RegisterScreen({ navigation }) {
           {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.registerText}>开启领养之旅</Text>}
         </TouchableOpacity>
 
-        <View style={styles.loginRow}>
-          <Text style={styles.loginText}>已有账号？直接输入即可登录</Text>
-        </View>
+        <TouchableOpacity style={styles.loginRow} onPress={() => navigation.navigate('Login')}>
+          <Text style={styles.loginText}>已有账号？点击这里登录</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );

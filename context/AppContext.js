@@ -45,14 +45,47 @@ export function AppProvider({ children }) {
     if (!error && data) setFavorites(data.map(fav => fav.pet_id));
   };
 
+  const markAsAdopted = async (petId) => {
+    const { error } = await supabase.from('pets').update({ status: 'adopted' }).eq('id', petId);
+    if (!error) {
+      setPets(prev => prev.map(p => p.id === petId ? { ...p, status: 'adopted' } : p));
+    }
+  };
+
+  useEffect(() => {
+    if (!user) return;
+    
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+        const newMessage = payload.new;
+        if (newMessage.sender_id !== user.id) {
+          // Simple foreground notification
+          // Alert.alert('新消息', newMessage.text); // Too intrusive? Maybe just update state.
+        }
+        setChats(prev => prev.map(chat => 
+          chat.id === newMessage.chat_id 
+            ? { ...chat, messages: [...(chat.messages || []), { ...newMessage, is_from_user: newMessage.sender_id === user.id }] }
+            : chat
+        ));
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   const fetchProfile = async () => {
     if (!user) return;
     const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
     if (!error && data) setProfile(data);
-    else if (error && error.code === 'PGRST116') {
-      // Profile doesn't exist yet, create it
-      const { data: newProfile } = await supabase.from('profiles').insert({ id: user.id, nickname: '新用户', city: '上海' }).select().single();
-      if (newProfile) setProfile(newProfile);
+    else if (error) {
+      console.log('fetchProfile error:', error);
+      if (error.code === 'PGRST116') {
+        const { data: newProfile } = await supabase.from('profiles').insert({ id: user.id, nickname: '新用户', city: '上海' }).select().single();
+        if (newProfile) setProfile(newProfile);
+      }
     }
   };
 
@@ -162,11 +195,11 @@ export function AppProvider({ children }) {
 
   const value = useMemo(() => ({
     pets, favorites, isFavorite, toggleFavorite,
-    chats, addMessageToChat,
+    chats, addMessageToChat, markAsAdopted,
     user, profile, updateProfile, signOut,
     adoptionApplications, fetchAdoptionApplications,
     submitAdoption,
-  }), [pets, favorites, chats, user, profile, adoptionApplications]);
+  }), [pets, favorites, chats, user, profile, adoptionApplications, markAsAdopted]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

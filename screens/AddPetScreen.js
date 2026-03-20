@@ -26,8 +26,8 @@ export default function AddPetScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!name.trim() || !zhName.trim() || !breed.trim()) {
-      Alert.alert('信息不完整', '请至少填写英文名、中文名和品种。');
+    if (!zhName.trim() || !breed.trim()) {
+      Alert.alert('信息不完整', '请填写宠物姓名和品种。');
       return;
     }
     if (!user) {
@@ -38,8 +38,8 @@ export default function AddPetScreen({ navigation }) {
     try {
       const { error } = await supabase.from('pet_submissions').insert({
         submitter_id: user.id,
-        name: name.trim(),
         zh_name: zhName.trim(),
+        name: zhName.trim(), // Mirror zhName to name for compatibility
         breed: breed.trim(),
         age: age.trim(),
         avatar: avatar.trim(),
@@ -89,10 +89,8 @@ export default function AddPetScreen({ navigation }) {
 
         <Text style={styles.groupTitle}>基本信息</Text>
         <View style={styles.card}>
-          <Text style={styles.label}>中文名 *</Text>
+          <Text style={styles.label}>宠物姓名 *</Text>
           <TextInput style={styles.input} placeholder="例如：小白" placeholderTextColor="#B9B3AA" value={zhName} onChangeText={setZhName} />
-          <Text style={styles.label}>英文名 *</Text>
-          <TextInput style={styles.input} placeholder="例如：Snowy" placeholderTextColor="#B9B3AA" value={name} onChangeText={setName} />
           <Text style={styles.label}>品种 *</Text>
           <TextInput style={styles.input} placeholder="例如：拉布拉多" placeholderTextColor="#B9B3AA" value={breed} onChangeText={setBreed} />
           <Text style={styles.label}>年龄</Text>

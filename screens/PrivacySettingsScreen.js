@@ -29,27 +29,11 @@ export default function PrivacySettingsScreen({ navigation }) {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>通知设置</Text>
-        <View style={styles.row}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.rowLabel}>消息免打扰</Text>
-            <Text style={styles.rowSub}>开启后将不会收到新消息通知</Text>
-          </View>
-          <Switch
-            value={profile?.notifications_muted ?? false}
-            onValueChange={(v) => toggle('notifications_muted', v)}
-            thumbColor="#FFFFFF"
-            trackColor={{ false: '#E2D7CF', true: '#C55A2B' }}
-          />
-        </View>
-      </View>
-
-      <View style={styles.section}>
         <Text style={styles.sectionTitle}>隐私偏好</Text>
         <View style={styles.row}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.rowLabel}>展示个人信息</Text>
-            <Text style={styles.rowSub}>关闭后其他用户将无法查看您的资料</Text>
+            <Text style={styles.rowLabel}>公开个人资料</Text>
+            <Text style={styles.rowSub}>关闭后，其他用户将仅能看到您的头像和昵称</Text>
           </View>
           <Switch
             value={profile?.show_profile_to_others ?? true}

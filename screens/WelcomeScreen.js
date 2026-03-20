@@ -38,6 +38,13 @@ export default function WelcomeScreen({ navigation }) {
         <Text style={styles.primaryText}>立即开始</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity
+        style={styles.loginButton}
+        onPress={() => navigation.navigate('Login')}
+      >
+        <Text style={styles.loginButtonText}>已有账号？立即登录</Text>
+      </TouchableOpacity>
+
       <View style={styles.footer}>
         <TouchableOpacity>
           <Text style={styles.footerLink}>了解更多</Text>

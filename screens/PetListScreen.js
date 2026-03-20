@@ -10,7 +10,11 @@ export default function PetListScreen({ route, navigation }) {
   const { pets } = useApp();
   const species = route?.params?.species ?? null;
 
-  const filteredPets = species ? pets.filter(p => (p.species === species || p.species === (species === 'dog' ? 'dog' : species))) : pets;
+  const filteredPets = pets.filter(p => {
+    const matchesSpecies = species ? (p.species === species || p.species === (species === 'dog' ? 'dog' : species)) : true;
+    const isAvailable = (p.status || 'available') === 'available';
+    return matchesSpecies && isAvailable;
+  });
   const title = species ? `${SPECIES_LABEL[species] ?? '全部'}待领养` : '所有等爱的毛孩子';
 
   return (

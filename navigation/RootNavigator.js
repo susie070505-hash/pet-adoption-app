@@ -10,6 +10,7 @@ import PetListScreen from '../screens/PetListScreen';
 import AddPetScreen from '../screens/AddPetScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import PrivacySettingsScreen from '../screens/PrivacySettingsScreen';
+import LoginScreen from '../screens/LoginScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -18,6 +19,7 @@ export default function RootNavigator() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
+      <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="MainTabs" component={TabNavigator} />
       <Stack.Screen name="PetList" component={PetListScreen} />
       <Stack.Screen name="PetDetail" component={PetDetailScreen} />

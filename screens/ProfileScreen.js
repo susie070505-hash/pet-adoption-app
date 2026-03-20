@@ -63,13 +63,31 @@ export default function ProfileScreen({ navigation }) {
             <Ionicons name="camera" size={12} color="#FFFFFF" />
           </View>
         </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.name}>{profile?.nickname ?? '用户'}</Text>
-          <Text style={styles.subtitle}>{profile?.city ?? '未设置所在地'}</Text>
-        </View>
+        <TouchableOpacity style={{ flex: 1 }} onPress={() => navigation.navigate('EditProfile')}>
+          <Text style={styles.name}>{profile?.nickname || '新用户'}</Text>
+          <Text style={styles.subtitle}>{profile?.city || '未设置所在地'}</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('EditProfile')}>
           <Ionicons name="pencil" size={16} color="#C55A2B" />
         </TouchableOpacity>
+      </View>
+
+      {/* Stats - Only visible if show_profile_to_others is true, or if it's the current user */}
+      <View style={styles.statsRow}>
+        <View style={styles.statItem}>
+          <Text style={styles.statValue}>{adoptionApplications.length}</Text>
+          <Text style={styles.statLabel}>领养申请</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={styles.statValue}>{profile?.city || '未知'}</Text>
+          <Text style={styles.statLabel}>所在地区</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={styles.statValue}>0</Text>
+          <Text style={styles.statLabel}>收藏宠物</Text>
+        </View>
       </View>
 
       {/* My Adoption Applications */}
@@ -146,6 +164,14 @@ const styles = StyleSheet.create({
   avatarText: { fontSize: 24, fontWeight: '700', color: '#C55A2B' },
   name: { fontSize: 16, fontWeight: '700', color: '#3C2A21' },
   subtitle: { marginTop: 4, fontSize: 12, color: '#8A7C71' },
+  statsRow: {
+    marginTop: 18, marginHorizontal: 20, backgroundColor: '#FFFFFF',
+    borderRadius: 20, paddingVertical: 18, flexDirection: 'row', alignItems: 'center'
+  },
+  statItem: { flex: 1, alignItems: 'center' },
+  statValue: { fontSize: 16, fontWeight: '800', color: '#C55A2B' },
+  statLabel: { fontSize: 11, color: '#8A7C71', marginTop: 4 },
+  statDivider: { width: 1, height: 24, backgroundColor: '#F4E8DE' },
   editButton: {
     width: 30, height: 30, borderRadius: 15, borderWidth: 1,
     borderColor: '#F0D3BF', justifyContent: 'center', alignItems: 'center'

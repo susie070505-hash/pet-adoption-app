@@ -38,11 +38,6 @@ export function AppProvider({ children }) {
     }
   }, [user]);
 
-  const toggleFavorite = async (petId) => {
-    const isFav = favorites.includes(petId);
-    const newFavs = isFav ? favorites.filter(id => id !== petId) : [...prev, petId]; // logic fix below
-  };
-
   const fetchPets = async () => {
     const { data, error } = await supabase.from('pets').select('*').order('created_at', { ascending: false });
     if (!error && data) setPets(data);
